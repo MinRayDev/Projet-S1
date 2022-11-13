@@ -11,5 +11,5 @@ def get_log_path():
 
 def log(message: str, path):
     file = open(path, "a")
-    file.write(message + "\n")
+    file.write(str(message) + "\n")
     file.close()

@@ -1,3 +1,3 @@
-def is_correct_number(size, minvalue, maxvalue):
-    return size.isnumeric() and (minvalue <= int(size) <= maxvalue)
+def is_correct_number(number, minvalue, maxvalue):
+    return number.isnumeric() and (minvalue <= int(number) <= maxvalue)
 

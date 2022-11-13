@@ -3,12 +3,12 @@ import os
 from utils import References
 
 
-def load_blocks():
-    dictionary = {}
-    for dir_ in os.listdir(References.base_path + "\\blocks"):
+def load_blocks() -> dict:
+    dictionary: dict = {}
+    for dir_ in os.listdir(References.base_path + "\\resources\\blocks"):
         blocks = []
-        for file in os.listdir(References.base_path + "\\blocks" + "\\" + dir_):
-            opened_file = open(References.base_path + "\\blocks" + "\\" + dir_ + "\\" + file, "r")
+        for file in os.listdir(References.base_path + "\\resources\\blocks\\" + dir_):
+            opened_file = open(References.base_path + "\\resources\\blocks\\" + dir_ + "\\" + file, "r")
             matrice = []
             for line in opened_file.readlines():
                 l_matrice = []
@@ -20,6 +20,3 @@ def load_blocks():
             blocks.append(block)
         dictionary[dir_] = blocks
     return dictionary
-
-
-

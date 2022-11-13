@@ -19,7 +19,8 @@ def menu():
             break
         elif inp == "r":  # TODO: rules
             break
-        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp), (window_height - 4))
+        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp),
+                   (window_height - 4))
 
 
 def settings_setup():
@@ -66,7 +67,7 @@ def settings_setup():
     clear_area(0, get_window_height_center() - 10, window_width, window_height)
 
     set_cursor((window_width // 6) - 12, get_window_height_center() - 5)
-    menu_notification("1/ Afficher à chaque tour de jeu l’ensemble des blocs disponibles et l’utilisateur en sélectionne un", -6)
+    menu_notification( "1/ Afficher à chaque tour de jeu l’ensemble des blocs disponibles et l’utilisateur en sélectionne un", -6)
     menu_notification("2/ Afficher uniquement 3 blocs sélectionnés aléatoirement", -1)
 
     bloc_placement = ""
@@ -88,7 +89,8 @@ def game_notification(text: str, color: str = ColorUtils.WHITE):
 
 def menu_notification(text: str, y_diff: int, color: str = ColorUtils.WHITE):
     draw_centered(text, y_diff, color)
-    draw_frame(get_window_width_center() - (len(text) // 2) - 2, get_window_height_center() + y_diff - 1, len(text) + 4, 2)
+    draw_frame(get_window_width_center() - (len(text) // 2) - 2, get_window_height_center() + y_diff - 1, len(text) + 4,
+               2)
 
 
 def alert(text: str):
@@ -115,3 +117,7 @@ def stop(selected: bool = False):
     input()
     clear()
     exit()
+
+
+def clear_game_console():
+    clear_area(References.console_x, References.console_y, os.get_terminal_size()[0] - References.console_x,  os.get_terminal_size()[1] - References.console_y)
