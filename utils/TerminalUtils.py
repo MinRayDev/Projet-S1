@@ -1,5 +1,5 @@
 import os
-
+import sys
 from utils import ColorUtils
 
 
@@ -10,10 +10,6 @@ def draw(text: str, x: int, y: int, color: str = ColorUtils.WHITE) -> None:
 def draw_centered(text: str, y_dist: int = 0, color: str = ColorUtils.WHITE) -> None:
     window_width, window_height = get_window_size()
     draw(text, ((window_width // 2) - (len(text) // 2)), (window_height // 2) + y_dist, color)
-
-
-def clear() -> None:
-    os.system("cls")  # TODO: verif los et faire en conséquence
 
 
 def clear_area(x: int, y: int, width: int, height: int) -> None:
@@ -28,6 +24,13 @@ def set_cursor(x: int, y: int) -> None:
 
 def get_window_size() -> tuple[int, int]:
     return os.get_terminal_size()
+
+
+def clear() -> None:
+    if "win" in sys.platform:
+        os.system("cls")
+    else:
+        clear_area(0, 0, os.get_terminal_size()[0], os.get_terminal_size()[1])
 
 
 def get_window_width_center() -> int:

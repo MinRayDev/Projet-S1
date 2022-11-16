@@ -1,4 +1,8 @@
 /logs
+!/logs/.gitkeep
 /.idea
 **/__pycache__
 /venv
+mypy.ini
+.mypy_cache
+infos

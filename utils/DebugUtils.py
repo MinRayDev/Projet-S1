@@ -2,10 +2,10 @@ from utils import References
 from datetime import datetime
 
 
-def get_log_path():
-    path: str = References.base_path + "logs\\log " + str(datetime.now()).split('.')[0].replace(":", "-") + ".txt"
-    f = open(path, "x")
-    f.close()
+def get_log_path() -> str:
+    path: str = References.base_path + "logs\\log-" + str(datetime.now()).split('.')[0].replace(":", "-") + ".txt"
+    file = open(path, "x")
+    file.close()
     return path
 
 
