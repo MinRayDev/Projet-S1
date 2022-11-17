@@ -80,6 +80,45 @@ def valid_position(grid, bloc, i, j) -> bool:
     DebugUtils.log("Bloc parts:", References.log_path)
     DebugUtils.log(str(bloc_parts), References.log_path)
     for bloc_part in bloc_parts:
+        if (j - bloc_part[0] < 0) or (i + bloc_part[1] >= len(References.grid["matrice"][j - bloc_part[0]])):
+            return False
         if References.grid["matrice"][j - bloc_part[0]][i + bloc_part[1]] == "2" or References.grid["matrice"][j - bloc_part[0]][i + bloc_part[1]] == "0":
             return False
     return True
+
+
+def row_state(grid, i) -> bool:
+    for x in grid[i]:
+        if x == "1":
+            return False
+    return True
+
+
+def col_state(grid, j) -> bool:
+    col = []
+    for line in grid:
+        col.append(line[j])
+    for y in col:
+        if y == "1":
+            return False
+    return True
+
+
+def row_clear(grid, i) -> int:
+    score: int = 0
+    for j, x in enumerate(grid[i]):
+        if x == "2":
+            References.grid["matrice"][i].pop(j)
+            References.grid["matrice"][i].insert(j, "1")
+            score += 1
+    return score
+
+
+def col_clear(grid, j) -> int:
+    score: int = 0
+    for i, line in enumerate(grid):
+        if line[j] == "2":
+            References.grid["matrice"][i].pop(j)
+            References.grid["matrice"][i].insert(j, "1")
+            score += 1
+    return score
