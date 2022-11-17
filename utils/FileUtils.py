@@ -1,4 +1,5 @@
 import os
+import json
 from utils import References
 
 
@@ -49,3 +50,10 @@ def load_blocks() -> dict[str, list[dict[str, str | list[list[str]]]]]:
 
 def file_exists(path) -> bool:
     return os.path.exists(path)
+
+
+def save_game(file_name: str, grid: list[list[str]], score: int):
+    dict_save = {"grid_matrice": grid, "score": score, "settings": References.settings}
+    file = open(References.base_path + "\\resources\\saves\\" + file_name + ".json", "w")
+    file.write(json.dumps(dict_save))
+    file.close()
