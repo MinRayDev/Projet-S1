@@ -1,9 +1,12 @@
 import os
 import json
+
+from typing import List
+
 from utils import References
 
 
-def save_grid(path: str, grid: list[list[str]]) -> None:
+def save_grid(path: str, grid: List[List[str]]) -> None:
     file = open(path, "w")
     string = ""
     for line in grid:
@@ -20,7 +23,7 @@ def save_grid(path: str, grid: list[list[str]]) -> None:
     file.close()
 
 
-def read_grid(path) -> list[list[str]]:
+def read_grid(path) -> List[List[str]]:
     file = open(path, 'r')
     matrice = []
     for line in file.readlines():
@@ -29,8 +32,8 @@ def read_grid(path) -> list[list[str]]:
     return matrice
 
 
-def load_blocks() -> dict[str, list[dict[str, str | list[list[str]]]]]:
-    dictionary: dict[str, list[dict[str, str | list[list[str]]]]] = {}
+def load_blocks():
+    dictionary = {}
     for dir_ in os.listdir(References.base_path + "\\resources\\blocks"):
         blocks = []
         for file in os.listdir(References.base_path + "\\resources\\blocks\\" + dir_):
@@ -52,7 +55,7 @@ def file_exists(path) -> bool:
     return os.path.exists(path)
 
 
-def save_game(file_name: str, grid: list[list[str]], score: int):
+def save_game(file_name: str, grid: List[List[str]], score: int):
     dict_save = {"grid_matrice": grid, "score": score, "settings": References.settings}
     file = open(References.base_path + "\\resources\\saves\\" + file_name + ".json", "w")
     file.write(json.dumps(dict_save))

@@ -1,5 +1,8 @@
 import os
 import sys
+
+from typing import Tuple
+
 from utils import ColorUtils
 
 
@@ -22,7 +25,7 @@ def set_cursor(x: int, y: int) -> None:
     draw("", x, y)
 
 
-def get_window_size() -> tuple[int, int]:
+def get_window_size() -> Tuple[int, int]:
     return os.get_terminal_size()
 
 
@@ -41,7 +44,7 @@ def get_window_height_center() -> int:
     return os.get_terminal_size()[1] // 2
 
 
-def draw_frame(x: int, y: int, width: int, height: int) -> tuple[int, int]:
+def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
     draw("╔", x, y)
     for x_ in range(x + 1, x + width):
         draw("═", x_, y)

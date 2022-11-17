@@ -47,7 +47,7 @@ def gen_cercle(size: int) -> str:
         string_to_return += "1" * (size - (int(size / (3 * 2)) - x) * 2)
         string_to_return += "0" * (int(size / (3 * 2)) - x)
         string_to_return += "\n"
-    for x in range(math.ceil(size - int(size / 3)) + 1):
+    for x in range(math.ceil(size - int(size / 3))):
         if x <= size:
             string_to_return += "1" * size
             string_to_return += "\n"

@@ -6,7 +6,7 @@ def is_correct_number(number, minvalue, maxvalue) -> bool:
     return number.isnumeric() and (minvalue <= int(number) <= maxvalue)
 
 
-def select_blocs() -> list[dict[str, str | list[list[str]]]]:
+def select_blocs() -> list:
     liste_to_return = []
     if References.settings["bloc_placement"] == 1:
         for liste in References.blocs_liste:

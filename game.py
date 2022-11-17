@@ -1,5 +1,7 @@
 import json
 
+from typing import List
+
 from utils.TerminalUtils import *
 from utils import References, ShapeUtils, Grid, Utils, ColorUtils, DebugUtils, FileUtils
 
@@ -7,7 +9,6 @@ from utils import References, ShapeUtils, Grid, Utils, ColorUtils, DebugUtils, F
 def rules():
     clear()
     draw("🐮", get_window_width_center(), get_window_height_center())
-
     input()
 
 
@@ -36,18 +37,20 @@ def main_menu() -> str:
                 References.grid["matrice"] = party_loaded["grid_matrice"]
                 References.score = party_loaded["score"]
                 return "Loaded"
+            elif t in References.STOP_WORDS:
+                clear()
+                exit()
         elif inp == "r":  # TODO: rules
             break
         elif inp == "stop":
             clear()
             exit()
-        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp),
-                   (window_height - 4))
+        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp), (window_height - 4))
 
 
 def load_game():
     clear()
-    menu_notification(" Saves", -15)
+    menu_notification(" Saves", -(get_window_size()[1]//2)+2)
     i = 0
     x = 2
     for file in os.listdir(References.base_path + "\\resources\\saves"):
@@ -57,10 +60,17 @@ def load_game():
     set_cursor(get_window_width_center(), get_window_height_center()+16)
     while True:
         inputed = input()
+        if inputed in References.STOP_WORDS:
+            clear()
+            exit()
+        elif inputed in References.BACK_WORDS:
+            break
         if Utils.is_correct_number(inputed, 1, len(os.listdir(References.base_path + "\\resources\\saves"))):
-            return json.load(open(References.base_path + "\\resources\\saves\\" + os.listdir(References.base_path + "\\resources\\saves")[i-1]))
-
-
+            return json.load(open(References.base_path + "\\resources\\saves\\" + os.listdir(References.base_path + "\\resources\\saves")[int(inputed)-1]))
+        else:
+            clear_area(0, get_window_height_center()+16, get_window_size()[0], 2)
+            set_cursor(get_window_width_center(), get_window_height_center() + 16)
+    load_new_game()
 def load_new_game():
     clear()
     window_width, window_height = get_window_size()
@@ -175,18 +185,15 @@ def settings_setup():
                 break
             else:
                 References.do_size = False
-        DebugUtils.log("Size: " + str(size), References.log_path)
 
         if References.do_shape and (not References.do_size):
             clear_area(0, get_window_height_center() - 10, window_width, window_height)
             shape = settings_set_shape()
-            DebugUtils.log(str(shape), References.log_path)
             if shape == "back":
                 References.do_size = True
                 continue
             else:
                 References.do_shape = False
-        DebugUtils.log("Shape: " + str(shape), References.log_path)
 
         if References.do_placement and (not References.do_size and not References.do_shape):
             clear_area(0, get_window_height_center() - 10, window_width, window_height)
@@ -196,10 +203,8 @@ def settings_setup():
                 continue
             else:
                 References.do_placement = False
-        DebugUtils.log("Placement: " + str(bloc_placement), References.log_path)
 
         if not References.do_size and not References.do_shape and not References.do_placement:
-            DebugUtils.log("End: " + str(size) + " " + str(shape) + " " + str(bloc_placement), References.log_path)
             References.settings["shape"] = References.grid_types[int(shape) - 1]
             References.settings["size"] = int(size)
             References.settings["bloc_placement"] = int(bloc_placement)
@@ -248,7 +253,7 @@ def clear_game_console() -> None:
                os.get_terminal_size()[1] - References.console_y)
 
 
-def menu(grid: list[list[str]]):  # TODO: saves, stop, back, rules
+def menu(grid: List[List[str]]):
     clear()
     while True:
         draw_frame(get_window_width_center() - 9, 1, 18, 4)

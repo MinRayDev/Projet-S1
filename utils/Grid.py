@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from utils import References, DebugUtils
 from utils.TerminalUtils import *
 
@@ -30,8 +32,8 @@ def bloc_to_string(matrice):
     return string_to_return
 
 
-def get_blocs(grid_type: str) -> list[list[str]]:
-    to_return: list[list[str]] = [References.common_liste]
+def get_blocs(grid_type: str) -> List[List[str]]:
+    to_return: List[List[str]] = [References.common_liste]
     if grid_type == "cercle":
         to_return.append(References.cercle_liste)
     elif grid_type == "losange":
@@ -41,14 +43,14 @@ def get_blocs(grid_type: str) -> list[list[str]]:
     return to_return
 
 
-def get_size(grid: list[list[str]]) -> tuple[int, int]:
+def get_size(grid: List[List[str]]) -> Tuple[int, int]:
     height = len(grid)
     width = len(grid[0])
     return width, height
 
 
-def load_grid(string_shape: str) -> list[list[str]]:
-    matrice: list[list[str]] = []
+def load_grid(string_shape: str) -> List[List[str]]:
+    matrice: List[List[str]] = []
     for line in string_shape.split("\n"):
         if len(line) > 0:
             t = []
@@ -64,8 +66,6 @@ def emplace_bloc(grid, bloc, i, j):
         for x_, x in enumerate(y):
             if x == "1":
                 bloc_parts.append((len(bloc) - y_ - 1, x_))
-    DebugUtils.log("Bloc parts:", References.log_path)
-    DebugUtils.log(str(bloc_parts), References.log_path)
     for bloc_part in bloc_parts:
         References.grid["matrice"][j - bloc_part[0]].pop(i + bloc_part[1])
         References.grid["matrice"][j - bloc_part[0]].insert(i + bloc_part[1], "2")
@@ -77,8 +77,6 @@ def valid_position(grid, bloc, i, j) -> bool:
         for x_, x in enumerate(y):
             if x == "1":
                 bloc_parts.append((len(bloc) - y_ - 1, x_))
-    DebugUtils.log("Bloc parts:", References.log_path)
-    DebugUtils.log(str(bloc_parts), References.log_path)
     for bloc_part in bloc_parts:
         if (j - bloc_part[0] < 0) or (i + bloc_part[1] >= len(References.grid["matrice"][j - bloc_part[0]])):
             return False

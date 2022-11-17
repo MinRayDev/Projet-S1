@@ -1,13 +1,15 @@
 import os
-from typing import Optional
+from typing import Optional, Dict, List
 
 grid_types = ["cercle", "losange", "triangle"]
 base_path = os.path.join(os.path.dirname(__file__).split("utils")[0])
-settings: dict[str, str | int] = {"shape": "", "size": 0, "bloc_placement": 0}
-random_blocs = []
+settings = {"shape": "", "size": 0, "bloc_placement": 0}
 grid = {"width": 0, "height": 0, "matrice": None}
+STOP_WORDS = ["stop", "arrêt", "arret"]
+MENU_WORDS = ["menu", "menus"]
+BACK_WORDS = ["back", "retour"]
 log_path = ""
-game_letters: Optional[list[str]] = None
+game_letters: Optional[List[str]] = None
 common_liste = []
 cercle_liste = []
 losange_liste = []
