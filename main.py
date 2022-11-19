@@ -1,13 +1,25 @@
+from typing import Optional, List
 
-import game
-from typing import Optional, List, Tuple
-from utils.TerminalUtils import *
+import in_game
+from utils.notifications import *
+from utils.terminal_utils import *
 import os
-from utils import GameUtils, FileUtils, Grid, References, ShapeUtils, Utils, DebugUtils
+from utils import Grid, References, shape_utils, Utils, DebugUtils, menus, game_menus
+from utils.file_utils import get_base_path, get_saves_path, get_maps_path, file_exists, load_blocs, save_grid, read_grid
 
+# Test
+# def test():
+#     print("- test")
+#     exit()
+#
+#
+# print(Utils.actions_string("arrêt", stop=References.STOP_WORDS, back=References.BACK_WORDS, menu=References.MENU_WORDS, stop_action=test))
+# exit()
 
+# TODO: replace tout les import * verif pep
 # TODO: faire diagram vue en algo pour expliquer le fonctionnement
 # TODO: faire des listes pour le stop, menu, back pour pouvoir écrire de différentes manières
+# TODO: faire responsive
 
 
 def update_score(count: int) -> int:
@@ -80,77 +92,76 @@ def inputs(blocs) -> Optional[Tuple[str, int, int]]:
     inputed_number = ""
     while not Utils.is_correct_number(inputed_number, 1,
                                       (len(References.blocs_liste[0]) + len(References.blocs_liste[1]))):
-        game.clear_game_console()
+        in_game.clear_game_console()
         draw("Choisissez une", References.console_x, References.console_y)
         draw("forme: ", References.console_x, References.console_y + 1)
         set_cursor(os.get_terminal_size()[0] - 8, os.get_terminal_size()[1] - 6 + 1)
         inputed_number = input()
         if inputed_number in References.STOP_WORDS:
-            game.stop(True)
+            in_game.stop(True)
         if not Utils.is_correct_number(inputed_number, 1,
                                        (len(References.blocs_liste[0]) + len(References.blocs_liste[1]))):
-            game.alert("Veuillez entrer un nombre valide !")
-    game.clear_notification()
+            alert("Veuillez entrer un nombre valide !")
+    clear_notification()
 
     x, y = "", ""
     while x not in References.game_letters or y not in References.game_letters:
-        game.clear_game_console()
+        in_game.clear_game_console()
         set_cursor(os.get_terminal_size()[0] - 15, os.get_terminal_size()[1] - 6)
         inputed_coos = input("x y: ")
         if inputed_coos == "stop":
-            game.stop(True)
+            in_game.stop(True)
         if inputed_coos == "menu":
-            game.menu(References.grid["matrice"])
+            game_menus.menu(References.grid["matrice"])
             clear()
             return None
         if " " not in inputed_coos:
-            game.clear_notification()
-            game.alert("Veuillez entrer des coordonnées valides !")
+            clear_notification()
+            alert("Veuillez entrer des coordonnées valides !")
             continue
         x = inputed_coos.split(" ")[0]
         y = inputed_coos.split(" ")[1]
         if x not in References.game_letters or y not in References.game_letters:
-            game.clear_notification()
-            game.alert("Veuillez entrer des coordonnées valides !")
-    game.clear_notification()
+            clear_notification()
+            alert("Veuillez entrer des coordonnées valides !")
+    clear_notification()
     set_cursor(os.get_terminal_size()[0] - 15, os.get_terminal_size()[1] - 6)
     return inputed_number, References.game_letters.index(x), References.game_letters.index(y)
 
 
-if __name__ == "__main__": # TODO: verif si les files save & maps existent si non, les créer
-    if not FileUtils.file_exists(References.base_path + "\\resources\\saves"):
-        os.mkdir(References.base_path + "\\resources\\saves")
-    if not FileUtils.file_exists(References.base_path + "\\resources\\maps"):
-        os.mkdir(References.base_path + "\\resources\\maps")
-    if not FileUtils.file_exists(References.base_path + "\\logs"):
-        os.mkdir(References.base_path + "\\logs")
-    bloc_list = FileUtils.load_blocks()
+if __name__ == "__main__":  # TODO: verif si les files save & maps existent si non, les créer
+    if not file_exists(get_saves_path()):
+        os.mkdir(get_saves_path())
+    if not file_exists(get_maps_path()):
+        os.mkdir(get_maps_path())
+    if not file_exists(get_base_path() + "\\logs"):
+        os.mkdir(get_base_path() + "\\logs")
+    bloc_list = load_blocs()
     References.common_liste = bloc_list["common"]
     References.cercle_liste = bloc_list["cercle"]
     References.losange_liste = bloc_list["losange"]
     References.triangle_liste = bloc_list["triangle"]
     References.log_path = DebugUtils.get_log_path()
-    game_type = game.main_menu()
+    game_type = menus.main_menu()
     References.blocs_liste = Grid.get_blocs(References.settings["shape"])
     if game_type == "New":
         grid_matrice: Optional[List[List[str]]] = None
-        grid_file_path: str = References.base_path + "\\resources\\maps\\" + str(References.settings["shape"]) + "-" + str(
-            References.settings["size"]) + ".txt"
-        if not FileUtils.file_exists(grid_file_path):
-            if References.settings["shape"] == References.grid_types[0]:
-                FileUtils.save_grid(grid_file_path, Grid.load_grid(ShapeUtils.gen_cercle(References.settings["size"])))
-            elif References.settings["shape"] == References.grid_types[1]:
-                FileUtils.save_grid(grid_file_path, Grid.load_grid(ShapeUtils.gen_losange(References.settings["size"])))
-            elif References.settings["shape"] == References.grid_types[2]:
-                FileUtils.save_grid(grid_file_path, Grid.load_grid(ShapeUtils.gen_triangle(References.settings["size"])))
-        grid_matrice = FileUtils.read_grid(grid_file_path)
+        grid_file_path: str = get_maps_path() + str(References.settings["shape"]) + "-" + str(References.settings["size"]) + ".txt"
+        if not file_exists(grid_file_path):
+            if References.settings["shape"] == References.GRID_TYPES[0]:
+                save_grid(grid_file_path, Grid.convert_grid(shape_utils.gen_circle(References.settings["size"])))
+            elif References.settings["shape"] == References.GRID_TYPES[1]:
+                save_grid(grid_file_path, Grid.convert_grid(shape_utils.gen_losange(References.settings["size"])))
+            elif References.settings["shape"] == References.GRID_TYPES[2]:
+                save_grid(grid_file_path, Grid.convert_grid(shape_utils.gen_triangle(References.settings["size"])))
+        grid_matrice = read_grid(grid_file_path)
 
         References.grid["matrice"] = grid_matrice
     size: Tuple[int, int] = Grid.get_size(References.grid["matrice"])
     References.grid["width"] = size[0]
     References.grid["height"] = size[1]
 
-    References.game_letters = GameUtils.get_letters(Grid.get_size(References.grid["matrice"])[0])
+    References.game_letters = Utils.get_letters(Grid.get_size(References.grid["matrice"])[0])
     clear()
     while True:
 
@@ -160,15 +171,17 @@ if __name__ == "__main__": # TODO: verif si les files save & maps existent si no
         if test is None:
             continue
         inputed_string, x_index, y_index = test
-        if not Grid.valid_position(References.grid["matrice"], usable_blocs[int(inputed_string) - 1]["matrice"], x_index, y_index):
+        if not Grid.valid_position(References.grid["matrice"], usable_blocs[int(inputed_string) - 1]["matrice"],
+                                   x_index, y_index):
             References.try_pos += 1
             clear()
-            game.warn(f"Hors de la grille. Plus que {str(3 - References.try_pos)} essais !")
+            warn(f"Hors de la grille. Plus que {str(3 - References.try_pos)} essais !")
             if References.try_pos >= 3:
-                game.stop()
+                in_game.stop()
             continue
-        Grid.emplace_bloc(References.grid["matrice"], usable_blocs[int(inputed_string) - 1]["matrice"], x_index, y_index)
-        game.clear_notification()
+        Grid.emplace_bloc(References.grid["matrice"], usable_blocs[int(inputed_string) - 1]["matrice"], x_index,
+                          y_index)
+        clear_notification()
         score_increment: int = 0
         for i in range(size[1]):
             if Grid.row_state(References.grid["matrice"], i):

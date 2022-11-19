@@ -1,23 +1,15 @@
-import json
-
-from typing import List
-
-from utils.TerminalUtils import *
-from utils import References, ShapeUtils, Grid, Utils, ColorUtils, DebugUtils, FileUtils
-
-
-def rules():
-    clear()
-    draw("🐮", get_window_width_center(), get_window_height_center())
-    input()
+from utils import Utils, Grid
+from utils.file_utils import get_resources_path, load_game, get_saves_path
+from utils.notifications import *
+from utils.shape_utils import gen_losange, gen_triangle, gen_circle
+from utils.terminal_utils import *
 
 
 def main_menu() -> str:
     window_height = get_window_size()[1]
     while True:
         clear()
-        for i, line in enumerate(open(References.base_path + "\\resources\\menu.txt", "r").readlines()):
-            draw(line.replace("\n", ""), get_window_width_center() - (83 // 2), get_window_height_center() - 11 + i)
+        draw_ascii_art(get_resources_path() + "\\menu.txt", get_window_width_center() - (83 // 2), get_window_height_center() - 11)
         draw_frame(get_window_width_center() - 11, get_window_height_center() - 2, 22, 4)
         draw_centered("Press 'a' to start", 0)
         draw_frame(get_window_width_center() - 15, get_window_height_center() + 3, 30, 4)
@@ -25,53 +17,54 @@ def main_menu() -> str:
         set_cursor(get_window_width_center(), (window_height - 4))
         inp = input()
         if inp == "a":
-            t = load_new_game()
-            if t == "1":
+            game_type: str = load_new_game()
+            if game_type == "1":
                 settings_setup()
                 return "New"
-            elif t == "2":
-                party_loaded: dict = load_game()
+            elif game_type == "2":
+                party_loaded = load_game()
                 References.settings["shape"] = party_loaded["settings"]["shape"]
                 References.settings["size"] = party_loaded["settings"]["size"]
                 References.settings["bloc_placement"] = party_loaded["settings"]["bloc_placement"]
                 References.grid["matrice"] = party_loaded["grid_matrice"]
                 References.score = party_loaded["score"]
                 return "Loaded"
-            elif t in References.STOP_WORDS:
+            elif game_type in References.STOP_WORDS:
                 clear()
                 exit()
         elif inp == "r":  # TODO: rules
             break
-        elif inp == "stop":
-            clear()
-            exit()
-        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp), (window_height - 4))
+        # TODO: Stop
+        clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp),
+                   (window_height - 4))
+        return ""
 
 
 def load_game():
     clear()
-    menu_notification(" Saves", -(get_window_size()[1]//2)+2)
+    menu_notification(" Saves", -(get_window_size()[1] // 2) + 2)
     i = 0
     x = 2
-    for file in os.listdir(References.base_path + "\\resources\\saves"):
-        draw(str(i+1) + "/ " + file[:-5], x, get_window_height_center()-15+4+i)
+    for file in os.listdir(get_saves_path()):
+        draw(str(i + 1) + "/ " + file[:-5], x, get_window_height_center() - 15 + 4 + i)
         i += 1
     draw_centered("Choisissez le fichier de partie que vous voulez:", 14)
-    set_cursor(get_window_width_center(), get_window_height_center()+16)
-    while True:
+    set_cursor(get_window_width_center(), get_window_height_center() + 16)
+    loop_condition = True
+    while loop_condition:  # TODO: back vers main menu, stop
         inputed = input()
-        if inputed in References.STOP_WORDS:
-            clear()
-            exit()
-        elif inputed in References.BACK_WORDS:
+        loop_condition = Utils.actions_string(inputed_string=inputed, stop=True, is_game_launched=False, back=True)
+        if not loop_condition:
             break
-        if Utils.is_correct_number(inputed, 1, len(os.listdir(References.base_path + "\\resources\\saves"))):
-            return json.load(open(References.base_path + "\\resources\\saves\\" + os.listdir(References.base_path + "\\resources\\saves")[int(inputed)-1]))
+        if Utils.is_correct_number(inputed, 1, len(os.listdir(get_saves_path()))):
+            return load_game(int(inputed) - 1)
         else:
-            clear_area(0, get_window_height_center()+16, get_window_size()[0], 2)
+            clear_area(0, get_window_height_center() + 16, get_window_size()[0], 2)
             set_cursor(get_window_width_center(), get_window_height_center() + 16)
-    load_new_game()
-def load_new_game():
+
+
+# TODO: refaire le naming des variables
+def load_new_game() -> str:
     clear()
     window_width, window_height = get_window_size()
     set_cursor((window_width // 6) - 12, get_window_height_center() - 5)
@@ -82,7 +75,7 @@ def load_new_game():
         clear_area(0, (window_height - 4), window_width, 10)
         set_cursor(int(window_width / 2), (window_height - 4))
         bloc_placement = input()
-        if bloc_placement.lower() == "back":
+        if bloc_placement.lower() == "back":  # TODO: back vers main menu, stop
             return "back"
         elif bloc_placement.lower() == "stop":
             clear()
@@ -92,7 +85,7 @@ def load_new_game():
     return bloc_placement
 
 
-def settings_set_size():
+def settings_set_size() -> str:
     size = ""
     while not Utils.is_correct_number(size, 21, 26):
         x_, y_ = draw_frame(get_window_width_center() - 18, get_window_height_center() - 2, 36, 5)
@@ -100,7 +93,7 @@ def settings_set_size():
         draw_centered("Choisir une dimension de plateau:", -1)
         set_cursor(get_window_width_center(), get_window_height_center() + 1)
         size = input()
-        if size.lower() == "back":
+        if size.lower() == "back":  # TODO: back vers main menu, stop
             return "back"
         if size.lower() == "stop":
             clear()
@@ -110,20 +103,20 @@ def settings_set_size():
     return size
 
 
-def settings_set_shape():
+def settings_set_shape() -> str:  # TODO: back vers main menu, stop
     window_width, window_height = get_window_size()
-    grid = Grid.load_grid(ShapeUtils.gen_cercle(11))
+    grid = Grid.convert_grid(gen_circle(11))
     Grid.draw_grid(grid, (window_width // 6) - 11, get_window_height_center() - 5)
     shape_name = "1. Cercle"
     draw(shape_name, (window_width // 6) - (len(shape_name) // 2), get_window_height_center() + 8)
 
-    grid = Grid.load_grid(ShapeUtils.gen_losange(11))
+    grid = Grid.convert_grid(gen_losange(11))
     Grid.draw_grid(grid, ((window_width * 2) // 3) - (window_width // 6) - 11, get_window_height_center() - 5)
     shape_name = "2. Losange"
     draw(shape_name, ((window_width * 2) // 3) - (window_width // 6) + (len(shape_name) // 2) - 11,
          get_window_height_center() + 8)
 
-    grid = Grid.load_grid(ShapeUtils.gen_triangle(11))
+    grid = Grid.convert_grid(gen_triangle(11))
     Grid.draw_grid(grid, window_width - (window_width // 6) - 11, get_window_height_center() - 2)
     shape_name = "3. Triangle"
     draw(shape_name, window_width - (window_width // 6) + (len(shape_name) // 2) - 11, get_window_height_center() + 8)
@@ -145,7 +138,7 @@ def settings_set_shape():
     return shape
 
 
-def settings_set_placement_type():
+def settings_set_placement_type() -> str:  # TODO: back vers main menu, stop
     window_width, window_height = get_window_size()
     set_cursor((window_width // 6) - 12, get_window_height_center() - 5)
     menu_notification(
@@ -167,7 +160,7 @@ def settings_set_placement_type():
     return bloc_placement
 
 
-def settings_setup():
+def settings_setup() -> None:  # TODO: back vers main menu, stop
     clear()
     window_width, window_height = get_window_size()
     draw_frame(get_window_width_center() - 15, get_window_height_center() - 15, 30, 4)
@@ -205,98 +198,7 @@ def settings_setup():
                 References.do_placement = False
 
         if not References.do_size and not References.do_shape and not References.do_placement:
-            References.settings["shape"] = References.grid_types[int(shape) - 1]
+            References.settings["shape"] = References.GRID_TYPES[int(shape) - 1]
             References.settings["size"] = int(size)
             References.settings["bloc_placement"] = int(bloc_placement)
             break
-
-
-def game_notification(text: str, color: str = ColorUtils.WHITE):
-    x, y = draw_frame(4 + (References.grid["width"] * 2) + 5 + 30 + 5, 2, 45, 2)
-    draw(text, x + 1, y, color)
-
-
-def menu_notification(text: str, y_diff: int, color: str = ColorUtils.WHITE):
-    draw_centered(text, y_diff, color)
-    draw_frame(get_window_width_center() - (len(text) // 2) - 2, get_window_height_center() + y_diff - 1, len(text) + 4,
-               2)
-
-
-def alert(text: str):
-    game_notification(text, ColorUtils.DARK_RED)
-
-
-def warn(text: str):
-    game_notification(text, ColorUtils.DARK_YELLOW)
-
-
-def clear_notification():
-    clear_area(4 + (References.grid["width"] * 2) + 5 + 30 + 5, 2, 46, 4)
-
-
-def stop(selected: bool = False):
-    color = ColorUtils.DARK_RED
-    if selected:
-        color = ColorUtils.DARK_GREEN
-    clear()
-    for i, line in enumerate(open(References.base_path + "\\resources\\end_screen.txt", "r").readlines()):
-        draw(line.replace("\n", ""), get_window_width_center() - (55 // 2), get_window_height_center() - 8 + i, color)
-    draw_centered("Score: " + str(References.score))
-    draw_centered("Press any key to continue...", 10)
-    input()
-    clear()
-    exit()
-
-
-def clear_game_console() -> None:
-    clear_area(References.console_x, References.console_y, os.get_terminal_size()[0] - References.console_x,
-               os.get_terminal_size()[1] - References.console_y)
-
-
-def menu(grid: List[List[str]]):
-    clear()
-    while True:
-        draw_frame(get_window_width_center() - 9, 1, 18, 4)
-        draw_centered("Game Menu", -16)
-
-        draw_frame(get_window_width_center() // 2 - 18, get_window_height_center() - 9, 35, 20)
-        for i, line in enumerate(
-                open(References.base_path + "\\resources\\save_icon.txt", "r", encoding="utf-8").readlines()):
-            draw(line.replace("\n", ""), get_window_width_center() // 2 - 15, get_window_height_center() - 7 + i)
-        draw("1. Save", get_window_width_center() // 2 - len("1. Save") // 2, get_window_height_center() - 9 + 20 - 3)
-
-        draw_frame(get_window_width_center() - 18, get_window_height_center() - 9, 35, 20)
-        for i, line in enumerate(
-                open(References.base_path + "\\resources\\rules_logo.txt", "r", encoding="utf-8").readlines()):
-            draw(line.replace("\n", ""), get_window_width_center() - 14, get_window_height_center() - 7 + i)
-        draw_centered("2. Rules", 8)
-
-        x, y = draw_frame(get_window_width_center() + 18, get_window_height_center() - 9, 35, 6)
-        draw("3. Visual Settings", x + 35 // 2 - len("3. Visual Settings") // 2, y + 2)
-
-        x, y = draw_frame(get_window_width_center() + 18, get_window_height_center() - 2, 35, 6)
-        draw("4. Stop", x + 35 // 2 - len("4. Stop") // 2, y + 2)
-
-        x, y = draw_frame(get_window_width_center() + 18, get_window_height_center() + 5, 35, 6)
-        draw("5. Back", x + 35 // 2 - len("5. Back") // 2, y + 2)
-
-        draw_centered("Que voulez vous faire ?", 13)
-        set_cursor(get_window_width_center(), get_window_height_center() + 15)
-        inputed = input()
-        if inputed == "save":
-            clear_area(0, get_window_height_center() + 13, get_window_size()[0], get_window_size()[1])
-            draw_centered("Entrez le nom du fichier:", 13)
-            set_cursor(get_window_width_center(), get_window_height_center() + 15)
-            inputed_file_name = input("")
-            FileUtils.save_game(inputed_file_name, grid, References.score)
-            clear()
-        elif inputed == "rules":
-            rules()
-            clear()
-        elif inputed == "stop":
-            stop(True)
-        elif inputed == "back":
-            break
-        else:
-            menu_notification("Veuillez entrer une proposition valide", -12, ColorUtils.DARK_RED)
-        set_cursor(0, get_window_size()[1])
