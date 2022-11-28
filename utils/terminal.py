@@ -1,10 +1,15 @@
 import os
 import sys
 from typing import Tuple
-from utils import ColorUtils
+from utils import colors, references
 
 
-def draw(text: str, x: int, y: int, color: str = ColorUtils.WHITE) -> None:
+def clear_game_console() -> None:
+    clear_area(references.console_x, references.console_y, os.get_terminal_size()[0] - references.console_x,
+               os.get_terminal_size()[1] - references.console_y)
+
+
+def draw(text: str, x: int, y: int, color: str = colors.WHITE) -> None:
     """Draw a text in the terminal.
 
     :param text: text to draw.
@@ -16,7 +21,7 @@ def draw(text: str, x: int, y: int, color: str = ColorUtils.WHITE) -> None:
     print(f"\033[{y};{x}H{color}{text}", end='', flush=True)
 
 
-def draw_centered(text: str, y_dist: int = 0, color: str = ColorUtils.WHITE) -> None:
+def draw_centered(text: str, y_dist: int = 0, color: str = colors.WHITE) -> None:
     """Draw text relative to the center of the terminal.
 
     :param text: text to draw.
@@ -53,16 +58,6 @@ def set_cursor(x: int, y: int) -> None:
     draw("", x, y)
 
 
-def get_window_size() -> Tuple[int, int]:
-    """Get the size of the terminal.
-
-    :return: the size of the terminal (columns, lines).
-    :rtype: Tuple[int, int].
-
-    """
-    return os.get_terminal_size()
-
-
 def clear() -> None:
     """Clear the terminal."""
 
@@ -72,16 +67,6 @@ def clear() -> None:
     else:
         # else we clear all the terminal by replacing characters with spaces
         clear_area(0, 0, os.get_terminal_size()[1], os.get_terminal_size()[0])
-
-
-def get_window_width_center() -> int:
-    """Get and return the center of the width of the window."""
-    return os.get_terminal_size()[0] // 2
-
-
-def get_window_height_center() -> int:
-    """Get and return the center of the height of the window."""
-    return os.get_terminal_size()[1] // 2
 
 
 def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
@@ -111,7 +96,7 @@ def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
     return x + 1, y + 1
 
 
-def draw_ascii_art(file_path: str, x: int, y: int, color: str = ColorUtils.WHITE) -> None:
+def draw_ascii_art(file_path: str, x: int, y: int, color: str = colors.WHITE) -> None:
     """Draw an ASCII art.
 
     :param file_path: Path to the file of the ASCII to draw
@@ -123,3 +108,23 @@ def draw_ascii_art(file_path: str, x: int, y: int, color: str = ColorUtils.WHITE
 
     for i, line in enumerate(open(file_path, "r").readlines()):
         draw(line.replace("\n", ""), x, y + i, color)
+
+
+def get_window_size() -> Tuple[int, int]:
+    """Get the size of the terminal.
+
+    :return: the size of the terminal (columns, lines).
+    :rtype: Tuple[int, int].
+
+    """
+    return os.get_terminal_size()
+
+
+def get_window_width_center() -> int:
+    """Get and return the center of the width of the window."""
+    return os.get_terminal_size()[0] // 2
+
+
+def get_window_height_center() -> int:
+    """Get and return the center of the height of the window."""
+    return os.get_terminal_size()[1] // 2

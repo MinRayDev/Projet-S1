@@ -1,7 +1,43 @@
 import os
 import json
 from typing import List, Dict, Union
-from utils import References
+from utils import references
+
+
+def get_base_path() -> str:
+    """Get path to the base directory of the project.
+
+    :return: The path.
+
+    """
+    return os.path.join(os.path.dirname(__file__).split("utils")[0])
+
+
+def get_resources_path():
+    """Get path to the resources directory of the project.
+
+    :return: The path.
+
+    """
+    return get_base_path() + "\\resources"
+
+
+def get_saves_path():
+    """Get path to the saves directory of the project.
+
+    :return: The path.
+
+    """
+    return get_resources_path() + "\\saves"
+
+
+def get_maps_path():
+    """Get path to the maps directory of the project.
+
+    :return: The path.
+
+    """
+    return get_resources_path() + "\\maps"
 
 
 def save_grid(path: str, grid: List[List[str]]) -> None:
@@ -41,14 +77,14 @@ def read_grid(path: str) -> List[List[str]]:
     return matrice
 
 
-def load_blocs() -> Dict[str, List[Dict[str, Union[str, List[List[str]]]]]]:
+def load_blocs() -> List[List[Dict[str, Union[str, List[List[str]]]]]]:
     """Read all blocs from directories, convert them to matrice and return all of them in a List.
 
-        All blocs are stored in different directories, so the function read all files in these directories and convert their contents into blocs,
-        blocs are dictionary dict(str, str | List[List|str]]). All blocs that are in the same directory are stored in the same List it-self is store in a dictionary,
-        the key is the name of the directory.
+    All blocs are stored in different directories, so the function read all files in these directories and convert their contents into blocs,
+    blocs are dictionary dict(str, str | List[List|str]]). All blocs that are in the same directory are stored in the same List it-self is store in a dictionary,
+    the key is the name of the directory.
 
-        :return: All blocs in a List.
+    :return: All blocs in a List.
 
     """
     dictionary: Dict[str, List[Dict[str, Union[str, List[List[str]]]]]] = {}
@@ -61,18 +97,14 @@ def load_blocs() -> Dict[str, List[Dict[str, Union[str, List[List[str]]]]]]:
             matrice: List[List[str]] = []
 
             for line in opened_file.readlines():
-                line_list: List[str] = []
-                [line_list.append(char) for char in line if char != " " and char != "\n"]
-                # for char in line:
-                #     if char != " " and char != "\n":
-                #         line_list.append(char)
+                line_list: List[str] = [char for char in line if char != " " and char != "\n"]
                 matrice.append(line_list)
 
             blocs.append({"name": file[:-4], "matrice": matrice})
 
         dictionary[directory] = blocs
 
-    return dictionary
+    return [dictionary["common"], dictionary["cercle"], dictionary["losange"], dictionary["triangle"]]
 
 
 def file_exists(path) -> bool:
@@ -96,11 +128,11 @@ def save_game(file_name: str, grid: List[List[str]], score: int) -> None:
     :param score: score of the game.
 
     """
-    game_dict = {"grid_matrice": grid, "score": score, "settings": References.settings}
+    game_dict = {"grid_matrice": grid, "score": score, "settings": references.settings}
     json.dump(game_dict, open(get_saves_path() + "\\" + file_name + ".json", "w"))
 
 
-def load_game(save: int):
+def load_game_json(save: int):
     """Load a game from a json file and return it as a dictionary.
 
     :param save: The index of the game to load in the saves' directory.
@@ -110,37 +142,11 @@ def load_game(save: int):
     return json.load(open(get_saves_path() + "\\" + os.listdir(get_saves_path())[save]))
 
 
-def get_base_path() -> str:
-    """Get path to the base directory of the project.
-
-    :return: The path.
-
-    """
-    return os.path.join(os.path.dirname(__file__).split("utils")[0])
-
-
-def get_resources_path():
-    """Get path to the resources directory of the project.
-
-    :return: The path.
-
-    """
-    return get_base_path() + "\\resources"
-
-
-def get_saves_path():
-    """Get path to the saves directory of the project.
-
-    :return: The path.
-
-    """
-    return get_resources_path() + "\\saves"
-
-
-def get_maps_path():
-    """Get path to the maps directory of the project.
-
-    :return: The path.
-
-    """
-    return get_resources_path() + "\\maps"
+def create_game_directories() -> None:
+    """Create the folders necessary for the proper functioning of the game"""
+    if not file_exists(get_saves_path()):
+        os.mkdir(get_saves_path())
+    if not file_exists(get_maps_path()):
+        os.mkdir(get_maps_path())
+    if not file_exists(get_base_path() + "\\logs"):
+        os.mkdir(get_base_path() + "\\logs")

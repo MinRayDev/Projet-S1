@@ -1,7 +1,7 @@
-from typing import List, Tuple, Union, Dict
+from typing import List, Union, Tuple
 
-from utils import References, DebugUtils
-from utils.terminal_utils import *
+from utils import references
+from utils.terminal import draw
 
 
 def draw_grid(grid: List[List[str]], x: int, y: int):
@@ -12,23 +12,14 @@ def draw_grid(grid: List[List[str]], x: int, y: int):
         draw(string, x, y + i)
 
 
-def bloc_to_string(matrice: List[List[str]]) -> str:
-    string_to_return = ""
-    for line in matrice:
-        for co in line:
-            string_to_return += "■ " if co == "1" else "  "
-        string_to_return += "\n"
-    return string_to_return
-
-
-def get_blocs(grid_type: str) -> list[list[dict[str, Union[str, list[list[str]]]]]]:
-    to_return: List[List[dict[str, Union[str, list[list[str]]]]]] = [References.common_liste]
-    if grid_type == References.GRID_TYPES[0]:
-        to_return.append(References.cercle_liste)
-    elif grid_type == References.GRID_TYPES[1]:
-        to_return.append(References.losange_liste)
-    elif grid_type == References.GRID_TYPES[2]:
-        to_return.append(References.triangle_liste)
+def get_blocs(grid_type: str, all_blocs: List) -> List[List[dict[str, Union[str, List[List[str]]]]]]:
+    to_return: List[List[dict[str, Union[str, list[list[str]]]]]] = [all_blocs[0]]
+    if grid_type == references.GRID_TYPES[0]:
+        to_return.append(all_blocs[1])
+    elif grid_type == references.GRID_TYPES[1]:
+        to_return.append(all_blocs[2])
+    elif grid_type == references.GRID_TYPES[2]:
+        to_return.append(all_blocs[3])
     return to_return
 
 
@@ -68,9 +59,10 @@ def valid_position(grid, bloc, i, j) -> bool:
             if x == "1":
                 bloc_parts.append((len(bloc) - y_ - 1, x_))
     for bloc_part in bloc_parts:
-        if (j - bloc_part[0] < 0) or (i + bloc_part[1] >= len(References.grid["matrice"][j - bloc_part[0]])):
+        if (j - bloc_part[0] < 0) or (i + bloc_part[1] >= len(references.grid_matrice[j - bloc_part[0]])):
             return False
-        if References.grid["matrice"][j - bloc_part[0]][i + bloc_part[1]] == "2" or References.grid["matrice"][j - bloc_part[0]][i + bloc_part[1]] == "0":
+        if references.grid_matrice[j - bloc_part[0]][i + bloc_part[1]] == "2" or \
+                references.grid_matrice[j - bloc_part[0]][i + bloc_part[1]] == "0":
             return False
     return True
 
@@ -96,8 +88,8 @@ def row_clear(grid: List[List[str]], i: int) -> int:
     score: int = 0
     for j, x in enumerate(grid[i]):
         if x == "2":
-            References.grid["matrice"][i].pop(j)
-            References.grid["matrice"][i].insert(j, "1")
+            references.grid_matrice[i].pop(j)
+            references.grid_matrice[i].insert(j, "1")
             score += 1
     return score
 
@@ -106,7 +98,7 @@ def col_clear(grid: List[List[str]], j: int) -> int:
     score: int = 0
     for i, line in enumerate(grid):
         if line[j] == "2":
-            References.grid["matrice"][i].pop(j)
-            References.grid["matrice"][i].insert(j, "1")
+            references.grid_matrice[i].pop(j)
+            references.grid_matrice[i].insert(j, "1")
             score += 1
     return score
