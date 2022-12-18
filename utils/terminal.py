@@ -1,94 +1,122 @@
+"""Fichier avec toutes les fonctions permettant d'intéragir de manière plus simple avec le terminal.
+@project Tetris
+@author Gauthier
+@author Marielle
+"""
 import os
 import sys
 from typing import Tuple
-from utils import colors, references
+from utils import colors
 
 
 def clear_game_console() -> None:
-    clear_area(references.console_x, references.console_y, os.get_terminal_size()[0] - references.console_x,
-               os.get_terminal_size()[1] - references.console_y)
+    """Vide la console de jeu.
+
+    :rtype: None.
+
+    """
+    clear_area(get_window_size()[0] - 15, get_window_size()[1] - 6, get_window_size()[0] - 1, get_window_size()[1] - 1)
 
 
 def draw(text: str, x: int, y: int, color: str = colors.WHITE) -> None:
-    """Draw a text in the terminal.
+    """Dessine un texte dans le terminal.
 
-    :param text: text to draw.
-    :param x: x position to draw.
-    :param y: y position to draw.
-    :param color: (optional) color of the text.
+    :param text: Texte à dessiner.
+    :param x: Position sur l'axe x où dessiner.
+    :param y: Position sur l'axe y où dessiner.
+    :param color: (optionnel) Couleur du texte.
+
+    :rtype: None.
 
     """
+    # \033[{y};{x}H pour mettre le curseur à la position x, y, end='' pour qu'il n'y ait pas de saut de ligne, flush=True pour forcer le print directement.
     print(f"\033[{y};{x}H{color}{text}", end='', flush=True)
 
 
 def draw_centered(text: str, y_dist: int = 0, color: str = colors.WHITE) -> None:
-    """Draw text relative to the center of the terminal.
+    """Dessine un texte par rapport au centre du terminal.
 
-    :param text: text to draw.
-    :param y_dist: distance on y-axis from the heigh center of the terminal.
-    :param color: (optional) color of the text.
+    :param text: Texte à dessiner.
+    :param y_dist: Distance sur l'axe y du centre de la hauteur du terminal.
+    :param color: (optionnel) Couleur du texte.
+
+    :rtype: None.
 
     """
     window_width, window_height = get_window_size()
+    # Dessine le texte de manbière centré en retirant la moitié de la longueur du texte à la moitié de la longueur du terminal.
     draw(text, ((window_width // 2) - (len(text) // 2)), (window_height // 2) + y_dist, color)
 
 
 def clear_area(x: int, y: int, width: int, height: int) -> None:
-    """Clear all in an area.
+    """Vide une zone.
 
-    :param x: column index where the area starts.
-    :param y: line index where the area starts.
-    :param width: width of the area.
-    :param height: height of the area.
+    :param x: Position sur l'axe x où la zone commence.
+    :param y: Position sur l'axe y où la zone commence.
+    :param width: Longueur de la zone.
+    :param height: Hauteur de la zone.
+
+    :rtype: None.
 
     """
 
     for i in range(x, x + width):
         for j in range(y, y + height):
+            # Remplace le caractère par un espace (pour qu'il soit visuellement vide) aux coordonnées i, j.
             draw(" ", i, j)
 
 
 def set_cursor(x: int, y: int) -> None:
-    """Set the cursor position at the given x,y coordinates.
+    """Place le curseur d'écriture aux coordonnées x, y.
 
-    :param x: column index.
-    :param y: line index.
+    :param x: Position sur l'axe x où dessiner.
+    :param y: Position sur l'axe y où dessiner.
+
+    :rtype: None.
 
     """
+    # Dessine un caractère vide (pour que le caractère aux coordonnées ne soit pas remplacé par un caractère vide comme avec un espace) aux coordonnées x, y.
     draw("", x, y)
 
 
 def clear() -> None:
-    """Clear the terminal."""
-
+    """Vide le terminal.
+    
+    :rtype: None.
+    
+    """
     if "win" in sys.platform:
-        # If user's os is windows the program use a command
+        # Si l'os de l'utilsateur est windows la commande "cls" est utilisée.
         os.system("cls")
     else:
-        # else we clear all the terminal by replacing characters with spaces
-        clear_area(0, 0, os.get_terminal_size()[1], os.get_terminal_size()[0])
+        # Sinon le terminal est vidé en utilisant la fonction clear_area.
+        os.system("clear")
 
 
 def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
-    """Draw a frame and return (x, y) coordinates.
+    """Dessine un cadre et retourne les coordonnées x, y à l'intérieur du cadre.
 
-    :param x: x coordinate to draw.
-    :param y: y coordinate to draw.
-    :param width: width of the frame.
-    :param height: height of the frame.
-    :return: coordinates of the inside of the frame (x, y).
-    :rtype: tuple of (int, int).
+    :param x: coordonné x où dessiner.
+    :param y: coordonné y où dessiner.
+    :param width: longueur du cadre.
+    :param height: hauteur du cadre.
+
+    :return: coordonnées à l'intérieur du cadre (x, y).
+    :rtype: Tuple[int, int].
 
     """
+    # Dessine les 4 coins du cadre.
     draw("╔", x, y)
     draw("╗", x + width, y)
     draw("╚", x, y + height)
     draw("╝", x + width, y + height)
 
+    # Dessine pour toutes les colonnes du cadre, des "=" en haut et en bas du cadre.
     for i in range(x + 1, x + width):
         draw("═", i, y)
         draw("═", i, y + height)
 
+    # Dessine pour toutes les lignes du cadre, des "=" à droite et à gauche du cadre.
     for j in range(y + 1, y + height):
         draw("║", x, j)
         draw("║", x + width, j)
@@ -97,23 +125,26 @@ def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
 
 
 def draw_ascii_art(file_path: str, x: int, y: int, color: str = colors.WHITE) -> None:
-    """Draw an ASCII art.
+    """Dessine un ASCII art.
 
-    :param file_path: Path to the file of the ASCII to draw
-    :param x: x position to draw.
-    :param y: y position to draw.
-    :param color: (optional) color of the text.
+    :param file_path: Chemin d'accès du fichier à dessiner.
+    :param x: coordonné x où dessiner.
+    :param y: coordonné y où dessiner.
+    :param color: (optionnel) Couleur du texte.
+
+    :rtype: None.
 
     """
 
+    # Pour toutes les lignes du String de l'ASCII art dessiner la ligne et descendre à chaque itération afin de restituer l'ASCII art.
     for i, line in enumerate(open(file_path, "r").readlines()):
         draw(line.replace("\n", ""), x, y + i, color)
 
 
 def get_window_size() -> Tuple[int, int]:
-    """Get the size of the terminal.
+    """Obtient et retourne la taille du terminal.
 
-    :return: the size of the terminal (columns, lines).
+    :return: Taille du terminal (x, y).
     :rtype: Tuple[int, int].
 
     """
@@ -121,10 +152,18 @@ def get_window_size() -> Tuple[int, int]:
 
 
 def get_window_width_center() -> int:
-    """Get and return the center of the width of the window."""
+    """Obtient et retourne le centre de la longueur du terminal.
+
+    :rtype: None.
+
+    """
     return os.get_terminal_size()[0] // 2
 
 
 def get_window_height_center() -> int:
-    """Get and return the center of the height of the window."""
+    """Obtient et retourne le centre de la hauteur du terminal.
+
+    :rtype: None.
+
+    """
     return os.get_terminal_size()[1] // 2

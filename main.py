@@ -1,30 +1,30 @@
-import json
+"""Fichier principal du projet.
+@project Tetris
+@author Gauthier
+@author Marielle
+"""
 import string
-from typing import List, Tuple
+from typing import Tuple, List, Optional
 
-from utils import grids, references, menus, game, blocs, shapes, logging
-from utils.files import get_maps_path, file_exists, load_blocs, save_grid, read_grid, create_game_directories, \
-    get_saves_path
+from utils import grids, references, menus, game, blocks, shapes
+from utils.files import get_maps_path, file_exists, save_grid, read_grid, create_game_directories
 from utils.game import update_score, draw_game, inputs
 from utils.notifications import warn, clear_notification
 from utils.terminal import clear
 
-# TODO: faire diagram vue en algo pour expliquer le fonctionnement
-
-
 if __name__ == "__main__":
+
+    # Création des dossiers nécessaires au jeu.
     create_game_directories()
+    # Création d'une nouvelle partie, True si la partie est vraiment nouvelle, False si la partie est chargée
+    new_game: bool = menus.main_menu()
 
-    references.log_path = logging.get_log_path()
-
-    game_type = menus.main_menu()
-
-    references.blocs_liste = grids.get_blocs(references.settings["shape"], load_blocs())  # TODO: remove la reference et le mettre en arg si on a le droit
-
-    if game_type == "New":
-        grid_file_path: str = get_maps_path() + str(references.settings["shape"]) + "-" + str(
+    if new_game:
+        grid_file_path: str = get_maps_path() + "/" + str(references.settings["shape"]) + "-" + str(
             references.settings["size"]) + ".txt"
+
         if not file_exists(grid_file_path):
+            # Création du fichier et sauvegarde de la carte en fonction de la forme de la carte.
             if references.settings["shape"] == references.GRID_TYPES[0]:
                 save_grid(grid_file_path, grids.convert_grid(shapes.gen_circle(references.settings["size"])))
             elif references.settings["shape"] == references.GRID_TYPES[1]:
@@ -32,28 +32,32 @@ if __name__ == "__main__":
             elif references.settings["shape"] == references.GRID_TYPES[2]:
                 save_grid(grid_file_path, grids.convert_grid(shapes.gen_triangle(references.settings["size"])))
 
-        grid_matrice: List[List[str]] = read_grid(grid_file_path)
-        references.grid_matrice = grid_matrice
+        references.grid_matrice = read_grid(grid_file_path)
 
     size: Tuple[int, int] = grids.get_size(references.grid_matrice)
-
     references.game_letters = string.ascii_lowercase[:(grids.get_size(references.grid_matrice)[0])]
+
     clear()
+
     while True:
-        usable_blocs = blocs.select_blocs()
-        draw_game(usable_blocs)
-        test = inputs(usable_blocs)
-        if test is None:
+        usable_blocks: List[List[List[str]]] = blocks.select_blocks()
+        draw_game(usable_blocks)
+        user_inputs: Optional[Tuple[str, int, int]] = inputs(usable_blocks)
+        # Si elles sont nulles (correspond à l'utilisation du menu).
+        if user_inputs is None:
+            # Retourne au début de la boucle.
             continue
-        inputed_string, x_index, y_index = test
-        if not grids.valid_position(references.grid_matrice, usable_blocs[int(inputed_string) - 1]["matrice"], x_index, y_index):
+        # On sépare les entrées du joueur, (numéro du bloc selectionné, coordonnée x, coordonnée y).
+        block_input, x_index, y_index = user_inputs
+        if not grids.valid_position(references.grid_matrice, usable_blocks[int(block_input) - 1], x_index, y_index):
             references.try_pos += 1
             if references.try_pos >= 3:
                 game.stop()
             clear()
             warn(f"Hors de la grille. Plus que {str(3 - references.try_pos)} essais !")
+            # Retourne au début de la boucle.
             continue
-        grids.emplace_bloc(references.grid_matrice, usable_blocs[int(inputed_string) - 1]["matrice"], x_index, y_index)
+        grids.emplace_bloc(references.grid_matrice, usable_blocks[int(block_input) - 1], x_index, y_index)
         clear_notification()
         score_increment: int = 0
         for i in range(size[1]):

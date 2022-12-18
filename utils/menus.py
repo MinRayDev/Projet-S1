@@ -1,7 +1,12 @@
+"""Fichier avec toutes les fonctions affichant des menus en dehors du jeu.
+@project Tetris
+@author Gauthier
+@author Marielle
+"""
 import os
-from typing import Union
+from typing import Union, Tuple, Dict, Optional
 
-from utils import numbers, grids, references, colors
+from utils import numbers, grids, references, colors, logging
 from utils.files import get_resources_path, load_game_json, get_saves_path
 from utils.notifications import menu_notification
 from utils.shapes import gen_losange, gen_triangle, gen_circle
@@ -10,85 +15,99 @@ from utils.terminal import clear, get_window_size, draw_ascii_art, get_window_wi
 
 
 def exit_game() -> None:
+    """Termine la partie."""
     clear()
     exit()
 
 
-def main_menu() -> str:
-    window_height = get_window_size()[1]
+def main_menu() -> bool:
+    """Affiche le menu principal.
+
+    :return: Si la partie est nouvelle retourne True sinon False.
+
+    """
+    # Récupère la hauteur du terminal.
+    window_height: int = get_window_size()[1]
     while True:
-        # Clear terminal window
         clear()
 
-        # Draw main menu
-        draw_ascii_art(get_resources_path() + "\\menu.txt", get_window_width_center() - (83 // 2),
+        draw_ascii_art(get_resources_path() + "/menu.txt", get_window_width_center() - (83 // 2),
                        get_window_height_center() - 11)
-        draw_frame(get_window_width_center() - 11, get_window_height_center() - 2, 22, 4)
-        draw_centered("Press 'a' to start", 0)
-        draw_frame(get_window_width_center() - 15, get_window_height_center() + 3, 30, 4)
-        draw_centered("Press 'r' to see the rules", 5)
+        draw_frame(get_window_width_center() - 17, get_window_height_center() - 2, 33, 4)
+        draw_centered("Appuyez sur 'a' pour commencer", 0)
+        draw_frame(get_window_width_center() - 20, get_window_height_center() + 3, 39, 4)
+        draw_centered("Appuyez sur 'r' pour voir les règles", 5)
         set_cursor(get_window_width_center(), (window_height - 4))
 
-        # Wait until user's input
-        inp = input()
-
-        # Choose between launch the game or see the rules
+        inp: str = input()
         if inp == "a":
-
-            # Choose between load a game or create a new game
             game_type: str = choose_game_type()
-
             if game_type == "1":
+                settings = settings_setup()
+                if settings != "back":
+                    references.settings["shape"] = settings[0]
+                    references.settings["size"] = settings[1]
+                    references.settings["bloc_placement"] = settings[2]
+                    return True
 
-                # If user choose to create a new game then he will setup settings of the game
-                t = settings_setup()
-                if t != "back":
-                    references.settings["shape"] = t[0]
-                    references.settings["size"] = t[1]
-                    references.settings["bloc_placement"] = t[2]
-                    return "New"
             elif game_type == "2":
+
                 party_loaded = load_game()
-                references.settings["shape"] = party_loaded["settings"]["shape"]
-                references.settings["size"] = party_loaded["settings"]["size"]
-                references.settings["bloc_placement"] = party_loaded["settings"]["bloc_placement"]
-                references.grid_matrice = party_loaded["grid_matrice"]
-                references.score = party_loaded["score"]
-                return "Loaded"
+                if party_loaded is not None:
+                    #  Les paramètres sont mis dans le dictionnaire de paramètre, les valeurs du score et de la grille sont aussi mis dans des variables.
+                    references.settings["shape"] = party_loaded["settings"]["shape"]
+                    references.settings["size"] = party_loaded["settings"]["size"]
+                    references.settings["bloc_placement"] = party_loaded["settings"]["bloc_placement"]
+                    references.grid_matrice = party_loaded["grid_matrice"]
+                    references.score = party_loaded["score"]
+                    return False
             elif game_type == "back":
+                # On retourne au début de la boucle pour accèder au menu principal.
                 continue
         elif inp == "r":
             rules()
         elif inp in references.STOP_WORDS:
             exit_game()
-        # clear_area(get_window_width_center() - len(inp), (window_height - 4), get_window_width_center() + len(inp), (window_height - 4))
 
 
-def load_game():
+def load_game() -> Optional[Dict]:
+    """Obtient un fichier de partie et le retourne en tant que json.
+
+    :return: La partie en tant que json.
+    :rtype: Optional[Dict].
+
+    """
     clear()
-    menu_notification(" Saves", -get_window_height_center() + 2)
-    i = 0
-    j = 0
-    x = 2
+    menu_notification("Sauvegardes", -get_window_height_center() + 2)
+
+    i: int = 0
+    j: int = 0
+    x: int = 2
     max_len: int = 0
+
+    # Pour tous les fichiers dans le dossier des sauvegardes
     for file in os.listdir(get_saves_path()):
+        # Affiche le nom du fichier en incrémentant de 1 l'axe des y à chaque itération
         draw(str(j + 1) + "/ " + file[:-5], x, i + 6)
         max_len += len(str(j + 1) + "/ " + file[:-5]) if len(str(j + 1) + "/ " + file[:-5]) > max_len else 0
         i += 1
         j += 1
+        # Si les coordonnées du texte dépasse la zone d'affichage les coordonnées x sont incrimentées et les coordonnées y sont remises à 0 afin de créer une nouvelle colonne.
         if i + 6 >= get_window_height_center() + 13:
             x += max_len + 3
             max_len = 0
             i = 0
-    draw_centered("Choisissez le fichier de partie que vous voulez:", 14)
+
+    draw_centered("Choisissez le fichier de partie que vous voulez charger:", 14)
     set_cursor(get_window_width_center(), get_window_height_center() + 16)
+
     while True:
         inputed = input()
 
         if inputed.lower() in references.STOP_WORDS:
             exit_game()
         elif inputed.lower() in references.BACK_WORDS:
-            break
+            return None
         elif numbers.is_correct_number(inputed, 1, len(os.listdir(get_saves_path()))):
             return load_game_json(int(inputed) - 1)
         else:
@@ -96,29 +115,24 @@ def load_game():
             set_cursor(get_window_width_center(), get_window_height_center() + 16)
 
 
-# TODO: refaire le naming des variables
 def choose_game_type() -> str:
-    # Clear the terminal window
+    """Permet à l'utilisateur de choisir le type de portie (nouvelle, ancienne).
+
+    :rtype: str.
+
+    """
     clear()
     window_width, window_height = get_window_size()
 
-    # draw the game type menu
-    menu_notification("1/ New Game", -6)
-    menu_notification("2/ Load Game ", -1)
+    menu_notification("1/ Nouvelle partie", -6)
+    menu_notification("2/ Charger une partie", -1)
     game_type = ""
 
-    # loop while the user doesnt choose an available game type or write an action word (like stop or back)
     while game_type != "1" and game_type != "2":
-
-        # clear the writting area
         clear_area(0, (window_height - 4), window_width, 10)
-
-        # set the cursor position at the center of the screen
         set_cursor(int(window_width / 2), (window_height - 4))
 
-        # user input what he want
         game_type = input()
-
         if game_type.lower() in references.STOP_WORDS:
             exit_game()
         elif game_type.lower() in references.BACK_WORDS:
@@ -129,6 +143,11 @@ def choose_game_type() -> str:
 
 
 def settings_set_size() -> str:
+    """Permet à l'utilisateur de choisir la taille de la grille de jeu.
+
+    :rtype: str.
+
+    """
     size = ""
     while not numbers.is_correct_number(size, 21, 26):
         x_, y_ = draw_frame(get_window_width_center() - 18, get_window_height_center() - 2, 36, 5)
@@ -146,19 +165,30 @@ def settings_set_size() -> str:
 
 
 def settings_set_shape() -> str:
+    """Permet à l'utilisateur de choisir la forme de la grille (losange, triangle, cercle).
+
+    :rtype: str.
+
+    """
     window_width, window_height = get_window_size()
+    # Génère une grille vièrge dont la taille est 11 et de forme de cercle.
     grid = grids.convert_grid(gen_circle(11))
+    # Dessine la grille.
     grids.draw_grid(grid, (window_width // 6) - 11, get_window_height_center() - 5)
     shape_name = "1. Cercle"
     draw(shape_name, (window_width // 6) - (len(shape_name) // 2), get_window_height_center() + 8)
 
+    # Génère une grille vièrge dont la taille est 11 et de forme de losange.
     grid = grids.convert_grid(gen_losange(11))
+    # Dessine la grille.
     grids.draw_grid(grid, ((window_width * 2) // 3) - (window_width // 6) - 11, get_window_height_center() - 5)
     shape_name = "2. Losange"
     draw(shape_name, ((window_width * 2) // 3) - (window_width // 6) + (len(shape_name) // 2) - 11,
          get_window_height_center() + 8)
 
+    # Génère une grille vièrge dont la taille est 11 et de forme de triangle.
     grid = grids.convert_grid(gen_triangle(11))
+    # Dessine la grille.
     grids.draw_grid(grid, window_width - (window_width // 6) - 11, get_window_height_center() - 2)
     shape_name = "3. Triangle"
     draw(shape_name, window_width - (window_width // 6) + (len(shape_name) // 2) - 11, get_window_height_center() + 8)
@@ -169,6 +199,7 @@ def settings_set_shape() -> str:
         clear_area(x_, y_, 35, 4)
         draw_centered("Veuillez choisir une forme proposée: ", 11)
         set_cursor(get_window_width_center(), get_window_height_center() + 13)
+
         shape = input()
         if shape.lower() in references.STOP_WORDS:
             exit_game()
@@ -180,8 +211,12 @@ def settings_set_shape() -> str:
 
 
 def settings_set_placement_type() -> str:
+    """Permet à l'utilisateur de choisir le régime de selection de blocs.
+
+    :rtype: str.
+
+    """
     window_width, window_height = get_window_size()
-    set_cursor((window_width // 6) - 12, get_window_height_center() - 5)
     menu_notification(
         "1/ Afficher à chaque tour de jeu l’ensemble des blocs disponibles et l’utilisateur en sélectionne un", -6)
     menu_notification("2/ Afficher uniquement 3 blocs sélectionnés aléatoirement", -1)
@@ -200,7 +235,12 @@ def settings_set_placement_type() -> str:
     return bloc_placement
 
 
-def settings_setup() -> Union[str, tuple[str, int, int]]:
+def settings_setup() -> Union[str, Tuple[str, int, int]]:
+    """Mis en place des paramètres et les retournes.
+
+    :rtype: Union[str, Tuple[str, int, int]].
+
+    """
     clear()
     window_width, window_height = get_window_size()
     draw_frame(get_window_width_center() - 15, get_window_height_center() - 15, 30, 4)
@@ -208,13 +248,15 @@ def settings_setup() -> Union[str, tuple[str, int, int]]:
     size: str = ""
     shape: str = ""
     bloc_placement: str = ""
+    references.do_size = True
+    references.do_shape = True
+    references.do_placement = True
     while True:
         if references.do_size:
             clear_area(0, get_window_height_center() - 10, window_width, window_height)
             size = settings_set_size()
 
             if size in references.BACK_WORDS:
-                main_menu()
                 return "back"
             elif size in references.STOP_WORDS:
                 exit_game()
@@ -248,6 +290,11 @@ def settings_setup() -> Union[str, tuple[str, int, int]]:
 
 
 def rules() -> None:
+    """Dessine les règles.
+
+    :rtype: None.
+
+    """
     clear()
     x, y = draw_frame(1, 1, get_window_size()[0] - 1, get_window_size()[1] - 1)
     draw("- Tout d’abord, l’utilisateur va devoir choisir entre charger une ancienne partie et en créer une nouvelle.",
