@@ -1,20 +1,14 @@
 """Fichier avec toutes les fonctions permettant d'intéragir de manière plus simple avec le terminal.
 @project Tetris
-@author Gauthier
-@author Marielle
 """
 import os
 import sys
-from typing import Tuple
+
 from utils import colors
 
 
 def clear_game_console() -> None:
-    """Vide la console de jeu.
-
-    :rtype: None.
-
-    """
+    """Vide la console de jeu."""
     clear_area(get_window_size()[0] - 15, get_window_size()[1] - 6, get_window_size()[0] - 1, get_window_size()[1] - 1)
 
 
@@ -25,8 +19,6 @@ def draw(text: str, x: int, y: int, color: str = colors.WHITE) -> None:
     :param x: Position sur l'axe x où dessiner.
     :param y: Position sur l'axe y où dessiner.
     :param color: (optionnel) Couleur du texte.
-
-    :rtype: None.
 
     """
     # \033[{y};{x}H pour mettre le curseur à la position x, y, end='' pour qu'il n'y ait pas de saut de ligne, flush=True pour forcer le print directement.
@@ -39,8 +31,6 @@ def draw_centered(text: str, y_dist: int = 0, color: str = colors.WHITE) -> None
     :param text: Texte à dessiner.
     :param y_dist: Distance sur l'axe y du centre de la hauteur du terminal.
     :param color: (optionnel) Couleur du texte.
-
-    :rtype: None.
 
     """
     window_width, window_height = get_window_size()
@@ -56,8 +46,6 @@ def clear_area(x: int, y: int, width: int, height: int) -> None:
     :param width: Longueur de la zone.
     :param height: Hauteur de la zone.
 
-    :rtype: None.
-
     """
 
     for i in range(x, x + width):
@@ -72,36 +60,30 @@ def set_cursor(x: int, y: int) -> None:
     :param x: Position sur l'axe x où dessiner.
     :param y: Position sur l'axe y où dessiner.
 
-    :rtype: None.
-
     """
     # Dessine un caractère vide (pour que le caractère aux coordonnées ne soit pas remplacé par un caractère vide comme avec un espace) aux coordonnées x, y.
     draw("", x, y)
 
 
 def clear() -> None:
-    """Vide le terminal.
-    
-    :rtype: None.
-    
-    """
+    """Vide le terminal."""
     if "win" in sys.platform:
         # Si l'os de l'utilsateur est windows la commande "cls" est utilisée.
         os.system("cls")
     else:
-        # Sinon le terminal est vidé en utilisant la fonction clear_area.
+        # Sinon le terminal est vidé en utilisant la commande "clear".
         os.system("clear")
 
 
-def draw_frame(x: int, y: int, width: int, height: int) -> Tuple[int, int]:
+def draw_frame(x: int, y: int, width: int, height: int) -> tuple[int, int]:
     """Dessine un cadre et retourne les coordonnées x, y à l'intérieur du cadre.
 
-    :param x: coordonné x où dessiner.
-    :param y: coordonné y où dessiner.
-    :param width: longueur du cadre.
-    :param height: hauteur du cadre.
+    :param x: Coordonné x où dessiner.
+    :param y: Coordonné y où dessiner.
+    :param width: Longueur du cadre.
+    :param height: Hauteur du cadre.
 
-    :return: coordonnées à l'intérieur du cadre (x, y).
+    :return: Coordonnées à l'intérieur du cadre (x, y).
     :rtype: Tuple[int, int].
 
     """
@@ -128,11 +110,9 @@ def draw_ascii_art(file_path: str, x: int, y: int, color: str = colors.WHITE) ->
     """Dessine un ASCII art.
 
     :param file_path: Chemin d'accès du fichier à dessiner.
-    :param x: coordonné x où dessiner.
-    :param y: coordonné y où dessiner.
+    :param x: Coordonné x où dessiner.
+    :param y: Coordonné y où dessiner.
     :param color: (optionnel) Couleur du texte.
-
-    :rtype: None.
 
     """
 
@@ -141,7 +121,7 @@ def draw_ascii_art(file_path: str, x: int, y: int, color: str = colors.WHITE) ->
         draw(line.replace("\n", ""), x, y + i, color)
 
 
-def get_window_size() -> Tuple[int, int]:
+def get_window_size() -> tuple[int, int]:
     """Obtient et retourne la taille du terminal.
 
     :return: Taille du terminal (x, y).
@@ -152,18 +132,10 @@ def get_window_size() -> Tuple[int, int]:
 
 
 def get_window_width_center() -> int:
-    """Obtient et retourne le centre de la longueur du terminal.
-
-    :rtype: None.
-
-    """
+    """Obtient et retourne le centre de la longueur du terminal."""
     return os.get_terminal_size()[0] // 2
 
 
 def get_window_height_center() -> int:
-    """Obtient et retourne le centre de la hauteur du terminal.
-
-    :rtype: None.
-
-    """
+    """Obtient et retourne le centre de la hauteur du terminal."""
     return os.get_terminal_size()[1] // 2

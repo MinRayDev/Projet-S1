@@ -1,7 +1,5 @@
 """Fichier contenant les fonctions permettant de vérifier qu'une entrée soit correcte.
 @project Tetris
-@author Gauthier
-@author Marielle
 """
 
 
@@ -13,4 +11,4 @@ def is_correct_number(number: str, min_value: int, max_value: int) -> bool:
     :param max_value: Valeur supérieure.
 
     """
-    return number.isnumeric() and (min_value <= int(number) <= max_value)
+    return number.isdigit() and (min_value <= int(number) <= max_value)

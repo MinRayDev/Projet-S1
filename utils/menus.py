@@ -1,14 +1,14 @@
 """Fichier avec toutes les fonctions affichant des menus en dehors du jeu.
 @project Tetris
-@author Gauthier
-@author Marielle
 """
 import os
-from typing import Union, Tuple, Dict, Optional
+import sys
+from typing import Optional
 
-from utils import numbers, grids, references, colors, logging
+from utils import numbers, grids, references, colors
 from utils.files import get_resources_path, load_game_json, get_saves_path
 from utils.notifications import menu_notification
+from utils.references import GridType
 from utils.shapes import gen_losange, gen_triangle, gen_circle
 from utils.terminal import clear, get_window_size, draw_ascii_art, get_window_width_center, get_window_height_center, \
     draw_centered, draw_frame, set_cursor, draw, clear_area
@@ -17,7 +17,7 @@ from utils.terminal import clear, get_window_size, draw_ascii_art, get_window_wi
 def exit_game() -> None:
     """Termine la partie."""
     clear()
-    exit()
+    sys.exit()
 
 
 def main_menu() -> bool:
@@ -70,11 +70,11 @@ def main_menu() -> bool:
             exit_game()
 
 
-def load_game() -> Optional[Dict]:
+def load_game() -> Optional[dict[str, GridType | int | dict[str, str | int]]]:
     """Obtient un fichier de partie et le retourne en tant que json.
 
     :return: La partie en tant que json.
-    :rtype: Optional[Dict].
+    :rtype: Optional[dict[str, GridType | int | dict[str, str | int]]].
 
     """
     clear()
@@ -118,7 +118,7 @@ def load_game() -> Optional[Dict]:
 def choose_game_type() -> str:
     """Permet à l'utilisateur de choisir le type de portie (nouvelle, ancienne).
 
-    :rtype: str.
+    :rtype: Str.
 
     """
     clear()
@@ -145,7 +145,7 @@ def choose_game_type() -> str:
 def settings_set_size() -> str:
     """Permet à l'utilisateur de choisir la taille de la grille de jeu.
 
-    :rtype: str.
+    :rtype: Str.
 
     """
     size = ""
@@ -167,7 +167,7 @@ def settings_set_size() -> str:
 def settings_set_shape() -> str:
     """Permet à l'utilisateur de choisir la forme de la grille (losange, triangle, cercle).
 
-    :rtype: str.
+    :rtype: Str.
 
     """
     window_width, window_height = get_window_size()
@@ -213,7 +213,7 @@ def settings_set_shape() -> str:
 def settings_set_placement_type() -> str:
     """Permet à l'utilisateur de choisir le régime de selection de blocs.
 
-    :rtype: str.
+    :rtype: Str.
 
     """
     window_width, window_height = get_window_size()
@@ -235,8 +235,8 @@ def settings_set_placement_type() -> str:
     return bloc_placement
 
 
-def settings_setup() -> Union[str, Tuple[str, int, int]]:
-    """Mis en place des paramètres et les retournes.
+def settings_setup() -> str | tuple[str, int, int]:
+    """Mis en place des paramètres et les retourne.
 
     :rtype: Union[str, Tuple[str, int, int]].
 
@@ -290,11 +290,7 @@ def settings_setup() -> Union[str, Tuple[str, int, int]]:
 
 
 def rules() -> None:
-    """Dessine les règles.
-
-    :rtype: None.
-
-    """
+    """Dessine les règles."""
     clear()
     x, y = draw_frame(1, 1, get_window_size()[0] - 1, get_window_size()[1] - 1)
     draw("- Tout d’abord, l’utilisateur va devoir choisir entre charger une ancienne partie et en créer une nouvelle.",

@@ -1,12 +1,11 @@
 """Fichier avec une grande partie du fonctionnement du jeu, l'affichage du jeu, l'affichage du menu interne au jeu.
 @project Tetris
-@author Gauthier
-@author Marielle
 """
 import os
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from utils.menus import rules
+from utils.references import BlockType, GridType
 from utils.terminal import clear, draw_ascii_art, get_window_width_center, get_window_height_center, draw_centered, \
     draw, get_window_size, draw_frame, clear_game_console, set_cursor, clear_area
 from utils import references, colors, grids, blocks, numbers
@@ -18,8 +17,6 @@ def stop(selected: bool = False) -> None:
     """Arrête la partie en cours.
 
     :param selected: True si le joueur a choisi d'arrêter la partie, False s'il n'a pas choisi.
-
-    :rtype: None.
 
     """
     color = colors.DARK_GREEN if selected else colors.DARK_RED
@@ -35,7 +32,7 @@ def stop(selected: bool = False) -> None:
     exit()
 
 
-def print_grid(grid: List[List[str]]) -> None:
+def print_grid(grid: list[list[str]]) -> None:
     """Dessine la grille.
 
     :param grid: matrice de la grille.
@@ -70,7 +67,7 @@ def print_grid(grid: List[List[str]]) -> None:
             draw(co + " ", 5 + (j * 2), 3 + i)
 
 
-def print_blocs(blocs_to_draw: List[List[List[str]]], selected: Optional[str] = None) -> None:
+def print_blocs(blocs_to_draw: list[list[list[str]]], selected: Optional[str] = None) -> None:
     """Dessine la grille.
 
     :param blocs_to_draw: Liste des matrices des blocs.
@@ -113,19 +110,17 @@ def update_score(count: int) -> int:
     :param count: Nombre à incrémenter.
 
     :return: Le score.
-    :rtype: int.
+    :rtype: Int.
 
     """
     references.score += count
     return references.score
 
 
-def draw_game(blocs_to_draw: List[List[List[str]]]) -> None:
+def draw_game(blocs_to_draw: list[BlockType]) -> None:
     """Dessine la partie (la grille, les blocs et le score).
 
     :param blocs_to_draw: Liste des blocs à dessiner.
-
-    :rtype None.
 
     """
     width = grids.get_size(references.grid_matrice)[0]
@@ -136,13 +131,13 @@ def draw_game(blocs_to_draw: List[List[List[str]]]) -> None:
     draw_frame(get_window_size()[0] - 16, get_window_size()[1] - 7, 16, 7)
 
 
-def inputs(block_list: List[List[List[str]]]) -> Optional[Tuple[str, int, int]]:
+def inputs(block_list: list[BlockType]) -> Optional[tuple[str, int, int]]:
     """Permet à l'utilisateur de selectionner les paramètres de sa partie.
 
     :param block_list: Liste des blocs.
 
     :return Les paramètres de la partie.
-    :rtype: Optional[Tuple[str, int, int]] (Soit None soit un Tuple[str, int, int]).
+    :rtype: Optional[Tuple[str, int, int]] (Soit None, soit un Tuple[str, int, int]).
 
     """
     inputed_number = ""
@@ -190,12 +185,10 @@ def inputs(block_list: List[List[List[str]]]) -> Optional[Tuple[str, int, int]]:
     return inputed_number, references.game_letters.index(x), references.game_letters.index(y)
 
 
-def menu(grid: List[List[str]]) -> None:
+def menu(grid: GridType) -> None:
     """Affiche le menu de jeu.
 
     :param grid: Grille de jeu.
-
-    :rtype: None.
 
     """
     while True:
@@ -229,7 +222,7 @@ def menu(grid: List[List[str]]) -> None:
         set_cursor(get_window_width_center(), get_window_height_center() + 15)
 
         # Choix de l'action.
-        inputed = input()
+        inputed: str = input()
         if inputed.lower() in references.SAVE_WORDS or inputed == "1":
             # Sauvegarde de la grille.
             clear_area(0, get_window_height_center() + 13, get_window_size()[0], get_window_size()[1])
@@ -258,12 +251,10 @@ def menu(grid: List[List[str]]) -> None:
 def color_settings() -> None:
     """Permet à l'utilisateur de modifier la couleur des blocs.
 
-    :rtype: None.
-
     """
     # Dessine le menu.
     clear()
-    draw_frame(get_window_width_center() - 9, 1, 18, 4)
+    draw_frame(get_window_width_center() - 12, 1, 24, 4)
     draw_centered("Paramètres de couleurs", -get_window_height_center() + 3)
     draw("■ Basic", 5, 15)
     draw(f"{colors.DARK_RED}■ {colors.WHITE}Red", 5, 16)

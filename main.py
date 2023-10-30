@@ -1,7 +1,5 @@
 """Fichier principal du projet.
 @project Tetris
-@author Gauthier
-@author Marielle
 """
 import string
 from typing import Tuple, List, Optional
@@ -10,6 +8,7 @@ from utils import grids, references, menus, game, blocks, shapes
 from utils.files import get_maps_path, file_exists, save_grid, read_grid, create_game_directories
 from utils.game import update_score, draw_game, inputs
 from utils.notifications import warn, clear_notification
+from utils.references import BlockType
 from utils.terminal import clear
 
 if __name__ == "__main__":
@@ -34,15 +33,15 @@ if __name__ == "__main__":
 
         references.grid_matrice = read_grid(grid_file_path)
 
-    size: Tuple[int, int] = grids.get_size(references.grid_matrice)
+    size: tuple[int, int] = grids.get_size(references.grid_matrice)
     references.game_letters = string.ascii_lowercase[:(grids.get_size(references.grid_matrice)[0])]
 
     clear()
 
     while True:
-        usable_blocks: List[List[List[str]]] = blocks.select_blocks()
+        usable_blocks: list[BlockType] = blocks.select_blocks()
         draw_game(usable_blocks)
-        user_inputs: Optional[Tuple[str, int, int]] = inputs(usable_blocks)
+        user_inputs: Optional[tuple[str, int, int]] = inputs(usable_blocks)
         # Si elles sont nulles (correspond à l'utilisation du menu).
         if user_inputs is None:
             # Retourne au début de la boucle.
